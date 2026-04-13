@@ -1,0 +1,56 @@
+﻿using LibraryManagement.Application.Interfaces.Repositories;
+using LibraryManagement.Domain.Entities;
+using LibraryManagement.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace LibraryManagement.Infrastructure.Repositories
+{
+    public class BookRepo : GenreircRepo<Book>, IBookRepo
+    {
+        public BookRepo(LibraryDbContext context) : base(context) { }
+
+        public async Task<Book?> GetBookWithDetailsAsync(int id, CancellationToken ct = default) =>
+         await _dbSet
+        .Include(b => b.Category)
+        .Include(b => b.Reviews)
+        .Include(b => b.borrows)
+        .ThenInclude(br => br.User)
+        .FirstOrDefaultAsync(b => b.Id == id, ct);
+
+        public async Task<IEnumerable<Book>> SearchBooksWithDetailsAsync(string query, CancellationToken ct = default)
+        {
+            return await _dbSet
+                .Include(b => b.Category)
+                .Include(b => b.Reviews)
+                .Include(b => b.borrows)
+                    .ThenInclude(br => br.User)
+                .Where(b => (b.Title.ToLower().Contains(query) ||
+                             b.Author.ToLower().Contains(query) ||
+                             b.ISBN.Contains(query)) && !b.IsDeleted)
+                .AsNoTracking()
+                .ToListAsync(ct);
+        }
+        public async Task<(IEnumerable<Book> Data, int TotalCount)> GetPagedBooksAsync(int pageNumber, int pageSize, CancellationToken ct)
+        {
+            var query = _dbSet
+                .AsNoTracking()
+                .Include(b => b.Category)
+                .Include(b => b.Reviews)
+                .Include(b => b.borrows);
+
+            var totalCount = await query.CountAsync(ct);
+
+            var data = await query
+                .OrderBy(b => b.Id) 
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .AsSplitQuery() 
+                .ToListAsync(ct);
+
+            return (data, totalCount);
+        }
+    }
+}
