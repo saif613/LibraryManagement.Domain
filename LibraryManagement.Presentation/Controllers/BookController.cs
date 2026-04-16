@@ -61,7 +61,7 @@ namespace LibraryManagement.Presentation.Controllers
         }
 
         [HttpGet("search")]
-        //[AllowAnonymous]
+        [AllowAnonymous]
         public async Task<IActionResult> SearchBooksByItem([FromQuery] string item, CancellationToken ct)
         {
             var books = await _bookService.SearchBooksByItemAsync(item, ct);
