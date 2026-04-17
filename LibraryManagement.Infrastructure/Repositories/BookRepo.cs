@@ -20,18 +20,16 @@ namespace LibraryManagement.Infrastructure.Repositories
         .ThenInclude(br => br.User)
         .FirstOrDefaultAsync(b => b.Id == id, ct);
 
-        public async Task<IEnumerable<Book>> SearchBooksWithDetailsAsync(string query, CancellationToken ct = default)
+        public async Task<Book> SearchBooksWithDetailsAsync(string query, CancellationToken ct = default)
         {
             return await _dbSet
                 .Include(b => b.Category)
                 .Include(b => b.Reviews)
-                .Include(b => b.borrows)
-                    .ThenInclude(br => br.User)
                 .Where(b => (b.Title.ToLower().Contains(query) ||
                              b.Author.ToLower().Contains(query) ||
                              b.ISBN.Contains(query)) && !b.IsDeleted)
                 .AsNoTracking()
-                .ToListAsync(ct);
+                .FirstOrDefaultasync(ct) ?? throw new KeyNotFoundException($"No book found matching the query: {query}"); 
         }
         public async Task<(IEnumerable<Book> Data, int TotalCount)> GetPagedBooksAsync(int pageNumber, int pageSize, CancellationToken ct)
         {

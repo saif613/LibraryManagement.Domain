@@ -57,11 +57,11 @@ namespace LibraryManagement.Application.Services
             return _mapper.Map<BookResponse>(book);
         }
 
-        public async Task<IEnumerable<BookResponse>> SearchBooksByItemAsync(string item, CancellationToken ct = default)
+        public async Task<BookResponseForSearch> SearchBookByItemAsyncForBook(string item, CancellationToken ct = default)
         {
             var query = item.Trim().ToLower();
-            var books = await _unitOfWork.Books.SearchBooksWithDetailsAsync(query, ct);
-            return _mapper.Map<IEnumerable<BookResponse>>(books);
+            var books = await _unitOfWork.Books.SearchBookWithDetailsAsync(query, ct);
+            return _mapper.Map<BookResponseForSearch>(books);
         }
 
         public async Task UpdateBookAsync(UpdateBookMetadataRequest request, CancellationToken ct = default)
