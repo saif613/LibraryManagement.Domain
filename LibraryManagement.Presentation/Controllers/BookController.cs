@@ -46,10 +46,10 @@ namespace LibraryManagement.Presentation.Controllers
 
         [HttpPut("{id:int}")]
         //[Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateBook(UpdateBookMetadataRequest request, CancellationToken ct)
+        public async Task<IActionResult> UpdateBook(int id, UpdateBookMetadataRequest request, CancellationToken ct)
         {
-            await _bookService.UpdateBookAsync(request, ct);
-            return NoContent();
+            var result = await _bookService.UpdateBookAsync(id, request, ct);
+            return Ok(result);
         }
 
         [HttpDelete("{id:int}")]

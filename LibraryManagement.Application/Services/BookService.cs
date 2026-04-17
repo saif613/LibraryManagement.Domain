@@ -2,6 +2,7 @@
 using FluentValidation;
 using LibraryManagement.Application.DTOs.Requests;
 using LibraryManagement.Application.DTOs.Responses;
+using LibraryManagement.Application.Exceptions;
 using LibraryManagement.Application.Interfaces.Repositories;
 using LibraryManagement.Application.Interfaces.ServiceInterfaces;
 using LibraryManagement.Application.Interfaces.UnitOfWork;
@@ -20,8 +21,15 @@ namespace LibraryManagement.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<BookResponse> CreateBookAsync(CreateBookRequest request, CancellationToken ct = default)
+        public async Task<BookResponseForGetAllAndCreate> CreateBookAsync(CreateBookRequest request, CancellationToken ct = default)
         {
+
+            if (await _unitOfWork.Books.ExistsByIsbnAsync(request.ISBN!, ct: ct))
+                throw new ConflictException("ISBN already exists");
+
+            if (await _unitOfWork.Books.ExistsByTitleAsync(request.Title!, ct: ct))
+                throw new ConflictException("Title already exists");
+
             var category = await _unitOfWork.Categories.GetById(request.CategoryId, ct);
             if (category == null)
                 throw new KeyNotFoundException("The specified Category does not exist.");
@@ -30,18 +38,17 @@ namespace LibraryManagement.Application.Services
 
             await _unitOfWork.Books.Create(book, ct);
             await _unitOfWork.SaveChangesAsync(ct);
-
-            return await GetBookByIdAsync(book.Id, ct) ?? _mapper.Map<BookResponse>(book);
+            return _mapper.Map<BookResponseForGetAllAndCreate>(book);
         }
-        public async Task<PagedResponse<BookResponseForGetAll>> GetBooksPagedAsync(int pageNumber, CancellationToken ct = default)
+        public async Task<PagedResponse<BookResponseForGetAllAndCreate>> GetBooksPagedAsync(int pageNumber, CancellationToken ct = default)
         {
             int pageSize = 10;
 
             var (books, totalCount) = await _unitOfWork.Books.GetPagedBooksAsync(pageNumber, pageSize, ct);
 
-            var bookDtos = _mapper.Map<List<BookResponseForGetAll>>(books);
+            var bookDtos = _mapper.Map<List<BookResponseForGetAllAndCreate>>(books);
 
-            return new PagedResponse<BookResponseForGetAll>(bookDtos, pageNumber, pageSize, totalCount);
+            return new PagedResponse<BookResponseForGetAllAndCreate>(bookDtos, pageNumber, pageSize, totalCount);
         }
 
         public async Task<BookResponse?> GetBookByIdAsync(int id, CancellationToken ct = default)
@@ -64,28 +71,30 @@ namespace LibraryManagement.Application.Services
             return _mapper.Map<BookResponseForSearch>(books);
         }
 
-        public async Task UpdateBookAsync(UpdateBookMetadataRequest request, CancellationToken ct = default)
+        public async Task<BookResponseForUpdate> UpdateBookAsync(int id, UpdateBookMetadataRequest request, CancellationToken ct = default)
         {
-            var existingBook = await _unitOfWork.Books.GetById(request.Id, ct);
-            if (existingBook == null) throw new Exception("Book not found");
+            var existingBook = await _unitOfWork.Books.GetById(id, ct);
 
-            if (!string.IsNullOrEmpty(request.ISBN) && request.ISBN != existingBook.ISBN)
+            if (existingBook == null)
+                throw new NotFoundException("Book not found");
+
+            if (request.ISBN != existingBook.ISBN &&
+                await _unitOfWork.Books.ExistsByIsbnAsync(request.ISBN!, id, ct))
             {
-                var isIsbnDuplicate = await _unitOfWork.Books.AnyAsync(b => b.ISBN == request.ISBN && b.Id != request.Id, ct);
-                if (isIsbnDuplicate)
-                    throw new Exception("This ISBN is already assigned to another book."); 
+                throw new ConflictException("ISBN already exists");
             }
 
-            if (!string.IsNullOrEmpty(request.Title) && request.Title != existingBook.Title)
+              if (request.Title != existingBook.Title &&
+                await _unitOfWork.Books.ExistsByTitleAsync(request.Title!, id, ct))
             {
-                var isTitleDuplicate = await _unitOfWork.Books.AnyAsync(b => b.Title == request.Title && b.Id != request.Id, ct);
-                if (isTitleDuplicate)
-                    throw new Exception("A book with the same title already exists.");
+                throw new ConflictException("Title already exists");
             }
 
             _mapper.Map(request, existingBook);
 
             await _unitOfWork.SaveChangesAsync(ct);
+
+            return _mapper.Map<BookResponseForUpdate>(existingBook);
         }
 
         public async Task SoftDeleteBookAsync(int id, CancellationToken ct = default)

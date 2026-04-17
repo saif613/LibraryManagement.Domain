@@ -28,8 +28,6 @@ namespace LibraryManagement.Application.Validators
                  .Matches(@"^\d{13}$").WithMessage("ISBN must contain numbers only.");
 
 
-
-
             RuleFor(x => x.Url)
                   .NotEmpty().WithMessage("Book URL is required.")
                   .MaximumLength(200).WithMessage("The URL cannot exceed 200 characters.")

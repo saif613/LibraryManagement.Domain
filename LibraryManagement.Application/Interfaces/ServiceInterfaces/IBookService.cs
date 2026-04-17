@@ -8,10 +8,10 @@ namespace LibraryManagement.Application.Interfaces.ServiceInterfaces
 {
     public interface IBookService
     {
-        Task<PagedResponse<BookResponseForGetAll>> GetBooksPagedAsync(int pageNumber, CancellationToken ct = default);
+        Task<PagedResponse<BookResponseForGetAllAndCreate>> GetBooksPagedAsync(int pageNumber, CancellationToken ct = default);
         Task<BookResponse?> GetBookByIdAsync(int id, CancellationToken ct = default);
-        Task<BookResponse> CreateBookAsync(CreateBookRequest request, CancellationToken ct = default);
-        Task UpdateBookAsync(UpdateBookMetadataRequest request, CancellationToken ct = default);
+        Task<BookResponseForGetAllAndCreate> CreateBookAsync(CreateBookRequest request, CancellationToken ct = default);
+        Task<BookResponseForUpdate> UpdateBookAsync(int id, UpdateBookMetadataRequest request, CancellationToken ct = default);
         Task SoftDeleteBookAsync(int id, CancellationToken ct = default);
         Task<BookResponseForSearch> SearchBookByItemAsync(string item, CancellationToken ct = default);
     }

@@ -29,7 +29,7 @@ namespace LibraryManagement.Infrastructure.Repositories
                              b.Author.ToLower().Contains(query) ||
                              b.ISBN.Contains(query)) && !b.IsDeleted)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(ct) ?? throw new KeyNotFoundException($"No book found matching the query: {query}"); 
+                .FirstOrDefaultAsync(ct) ?? throw new KeyNotFoundException($"No book found matching the query: {query}");
         }
         public async Task<(IEnumerable<Book> Data, int TotalCount)> GetPagedBooksAsync(int pageNumber, int pageSize, CancellationToken ct)
         {
@@ -40,13 +40,26 @@ namespace LibraryManagement.Infrastructure.Repositories
             var totalCount = await query.CountAsync(ct);
 
             var data = await query
-                .OrderBy(b => b.Id) 
+                .OrderBy(b => b.Id)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .AsSplitQuery() 
+                .AsSplitQuery()
                 .ToListAsync(ct);
 
             return (data, totalCount);
         }
+        public async Task<bool> ExistsByIsbnAsync(string isbn, int? excludeId = null, CancellationToken ct = default)
+        {
+            return await _context.Books
+                .AnyAsync(b => b.ISBN == isbn && (excludeId == null || b.Id != excludeId), ct);
+        }
+
+
+        public async Task<bool> ExistsByTitleAsync(string title, int? excludeId = null, CancellationToken ct = default)
+        {
+            return await _context.Books
+                .AnyAsync(b => b.Title == title && (excludeId == null || b.Id != excludeId), ct);
+        }
+
     }
 }
