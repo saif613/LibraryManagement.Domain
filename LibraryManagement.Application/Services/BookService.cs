@@ -33,15 +33,15 @@ namespace LibraryManagement.Application.Services
 
             return await GetBookByIdAsync(book.Id, ct) ?? _mapper.Map<BookResponse>(book);
         }
-        public async Task<PagedResponse<BookResponse>> GetBooksPagedAsync(int pageNumber, CancellationToken ct = default)
+        public async Task<PagedResponse<BookResponseForGetAll>> GetBooksPagedAsync(int pageNumber, CancellationToken ct = default)
         {
             int pageSize = 10;
 
             var (books, totalCount) = await _unitOfWork.Books.GetPagedBooksAsync(pageNumber, pageSize, ct);
 
-            var bookDtos = _mapper.Map<List<BookResponse>>(books);
+            var bookDtos = _mapper.Map<List<BookResponseForGetAll>>(books);
 
-            return new PagedResponse<BookResponse>(bookDtos, pageNumber, pageSize, totalCount);
+            return new PagedResponse<BookResponseForGetAll>(bookDtos, pageNumber, pageSize, totalCount);
         }
 
         public async Task<BookResponse?> GetBookByIdAsync(int id, CancellationToken ct = default)

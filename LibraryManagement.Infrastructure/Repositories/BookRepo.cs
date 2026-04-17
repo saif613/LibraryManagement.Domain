@@ -35,9 +35,7 @@ namespace LibraryManagement.Infrastructure.Repositories
         {
             var query = _dbSet
                 .AsNoTracking()
-                .Include(b => b.Category)
-                .Include(b => b.Reviews)
-                .Include(b => b.borrows);
+                .Include(b => b.Category);
 
             var totalCount = await query.CountAsync(ct);
 

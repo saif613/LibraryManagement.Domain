@@ -44,10 +44,16 @@ namespace LibraryManagement.Application.Mappings
                    }
                });
 
+            CreateMap<Book, BookResponseForGetAll>()
+               .ForMember(dest => dest.CategoryName,
+                   opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : "No Category"));
+
             CreateMap<CreateBookRequest, Book>();
 
             CreateMap<UpdateBookMetadataRequest, Book>()
                  .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+
         }
     }
 }
