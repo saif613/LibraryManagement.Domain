@@ -57,7 +57,7 @@ namespace LibraryManagement.Application.Services
             return _mapper.Map<BookResponse>(book);
         }
 
-        public async Task<BookResponseForSearch> SearchBookByItemAsyncForBook(string item, CancellationToken ct = default)
+        public async Task<BookResponseForSearch> SearchBookByItemAsync(string item, CancellationToken ct = default)
         {
             var query = item.Trim().ToLower();
             var books = await _unitOfWork.Books.SearchBookWithDetailsAsync(query, ct);

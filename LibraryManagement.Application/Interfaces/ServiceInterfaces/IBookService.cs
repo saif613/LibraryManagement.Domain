@@ -13,6 +13,6 @@ namespace LibraryManagement.Application.Interfaces.ServiceInterfaces
         Task<BookResponse> CreateBookAsync(CreateBookRequest request, CancellationToken ct = default);
         Task UpdateBookAsync(UpdateBookMetadataRequest request, CancellationToken ct = default);
         Task SoftDeleteBookAsync(int id, CancellationToken ct = default);
-        Task<BookResponseForSearch> SearchBookByItemAsyncForBook(string item, CancellationToken ct = default);
+        Task<BookResponseForSearch> SearchBookByItemAsync(string item, CancellationToken ct = default);
     }
 }

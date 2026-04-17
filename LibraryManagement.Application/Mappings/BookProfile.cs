@@ -18,8 +18,23 @@ namespace LibraryManagement.Application.Mappings
                 {
                     if (dest.Borrows == null || !dest.Borrows.Any())
                     {
-                        dest.Borrows = new List<BorrowResponse> { new BorrowResponse {UserName = "No User Name", Status = "Not borrowed" } };
+                        dest.Borrows = new List<BorrowResponse> { new BorrowResponse { Status = "Not borrowed", UserName = "No User Name " } };
                     }
+                    if (dest.Reviews == null || !dest.Reviews.Any())
+                    {
+                        dest.Reviews!.Add(new ReviewResponse
+                        {
+                            Comment = "Not reviewed yet",
+                        });
+                    }
+                });
+
+            CreateMap<Book, BookResponseForSearch>()
+                .ForMember(dest => dest.CategoryName,
+                    opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : "No Category"))
+
+                .AfterMap((src, dest) =>
+                {
                     if (dest.Reviews == null || !dest.Reviews.Any())
                     {
                         dest.Reviews!.Add(new ReviewResponse

@@ -7,10 +7,10 @@ namespace LibraryManagement.Application.DTOs.Responses
 {
     public class BorrowResponse
     {
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public int? UserId { get; set; }
 
-        public string UserName { get; set; } = string.Empty;
+        public string? UserName { get; set; } = string.Empty;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public DateTime? BorrowDate { get; set; }

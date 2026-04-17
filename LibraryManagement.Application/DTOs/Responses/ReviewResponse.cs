@@ -8,7 +8,7 @@ namespace LibraryManagement.Application.DTOs.Responses
     public class ReviewResponse
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public int ?UserId { get; set; }
+        public int? UserId { get; set; }
         public string? Comment { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
