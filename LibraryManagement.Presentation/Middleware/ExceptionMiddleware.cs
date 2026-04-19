@@ -1,10 +1,11 @@
 ﻿using LibraryManagement.Application.DTOs.Responses;
+using LibraryManagement.Application.Exceptions;
 using System.Net;
 using System.Text.Json;
 
 namespace LibraryManagement.Presentation.Middleware
 {
-    public sealed class ExceptionMiddleware: IMiddleware
+    public sealed class ExceptionMiddleware : IMiddleware
     {
         private readonly ILogger<ExceptionMiddleware> _logger;
         private readonly IHostEnvironment _env;
@@ -34,8 +35,10 @@ namespace LibraryManagement.Presentation.Middleware
 
             var statusCode = ex switch
             {
-                KeyNotFoundException => (int)HttpStatusCode.NotFound,
-                ArgumentException => (int)HttpStatusCode.BadRequest,
+                NotFoundException => (int)HttpStatusCode.NotFound,
+                BadRequestException => (int)HttpStatusCode.BadRequest,
+                ConflictException => (int)HttpStatusCode.Conflict,
+                UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
                 _ => (int)HttpStatusCode.InternalServerError
             };
 

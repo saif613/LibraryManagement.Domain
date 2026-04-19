@@ -8,8 +8,7 @@ namespace LibraryManagement.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
-    [AllowAnonymous]
+    [Authorize]
     public class BookController : ControllerBase
     {
         private readonly IBookService _bookService;
@@ -29,7 +28,7 @@ namespace LibraryManagement.Presentation.Controllers
 
         [HttpGet]
         [Route("{id:int}")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> GetBookById(int id, CancellationToken ct)
         {
             var book = await _bookService.GetBookByIdAsync(id, ct);
@@ -37,7 +36,7 @@ namespace LibraryManagement.Presentation.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateBook(CreateBookRequest request, CancellationToken ct)
         {
             var createdBook = await _bookService.CreateBookAsync(request, ct);
@@ -45,7 +44,7 @@ namespace LibraryManagement.Presentation.Controllers
         }
 
         [HttpPut("{id:int}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateBook(int id, UpdateBookMetadataRequest request, CancellationToken ct)
         {
             var result = await _bookService.UpdateBookAsync(id, request, ct);
@@ -61,7 +60,7 @@ namespace LibraryManagement.Presentation.Controllers
         }
 
         [HttpGet("search")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IActionResult> SearchBooksByItem([FromQuery] string item, CancellationToken ct)
         {
             var books = await _bookService.SearchBookByItemAsync(item, ct);

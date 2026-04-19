@@ -1,6 +1,6 @@
 ﻿namespace LibraryManagement.Presentation.Middleware
 {
-    public sealed class RequestLoggingMiddleware: IMiddleware
+    public sealed class RequestLoggingMiddleware : IMiddleware
     {
         private readonly ILogger<RequestLoggingMiddleware> _logger;
 
@@ -11,11 +11,36 @@
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            _logger.LogInformation("Request: {Method} {Path}", context.Request.Method, context.Request.Path);
+            var request = context.Request;
 
-            await next(context);
+            // start time
+            var startTime = DateTime.UtcNow;
 
-            _logger.LogInformation("Response: {StatusCode}", context.Response.StatusCode);
+            // Correlation ID (مهم جدًا للتتبع)
+            var correlationId = Guid.NewGuid().ToString();
+
+            _logger.LogInformation(
+                "Request [{CorrelationId}]: {Method} {Path} started",
+                correlationId,
+                request.Method,
+                request.Path
+            );
+
+            try
+            {
+                await next(context);
+            }
+            finally
+            {
+                var duration = DateTime.UtcNow - startTime;
+
+                _logger.LogInformation(
+                    "Response [{CorrelationId}]: {StatusCode} completed in {Duration} ms",
+                    correlationId,
+                    context.Response.StatusCode,
+                    duration.TotalMilliseconds
+                );
+            }
         }
     }
 }

@@ -12,10 +12,12 @@ namespace LibraryManagement.Presentation.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly ICurrentUserService _currentUserService;
 
-        public AuthenticationController(IAuthService authService)
+        public AuthenticationController(IAuthService authService, ICurrentUserService currentUserService)
         {
             _authService = authService;
+            _currentUserService = currentUserService;
         }
 
         [HttpPost("Register")]
@@ -50,23 +52,12 @@ namespace LibraryManagement.Presentation.Controllers
         [HttpGet("profile")]
         public async Task<IActionResult> GetUserProfile()
         {
-            var userId = GetCurrentUserId();
+            var userId = _currentUserService.UserId;
 
             var profile = await _authService.GetUserProfileAsync(userId);
 
             return Ok(profile);
         }
 
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null)
-            {
-                throw new UnauthorizedAccessException("Invalid token: User ID not found.");
-            }
-
-            return int.Parse(userIdClaim.Value);
-        }
     }
 }

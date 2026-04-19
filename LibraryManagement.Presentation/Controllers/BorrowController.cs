@@ -1,9 +1,7 @@
 ﻿using LibraryManagement.Application.DTOs.Requests;
 using LibraryManagement.Application.Interfaces.ServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace LibraryManagement.Presentation.Controllers
 {
@@ -13,16 +11,21 @@ namespace LibraryManagement.Presentation.Controllers
     public class BorrowController : ControllerBase
     {
         private readonly IBorrowService _borrowService;
+        private readonly ICurrentUserService _currentUserService;
 
-        public BorrowController(IBorrowService borrowService)
+        public BorrowController(
+            IBorrowService borrowService,
+            ICurrentUserService currentUserService)
         {
             _borrowService = borrowService;
+            _currentUserService = currentUserService;
         }
 
         [HttpPost("borrow")]
         public async Task<IActionResult> BorrowBook([FromBody] BorrowRequest request, CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
+            var userId = _currentUserService.UserId;
+
             var result = await _borrowService.BorrowBookAsync(request, userId, ct);
             return Ok(result);
         }
@@ -30,7 +33,8 @@ namespace LibraryManagement.Presentation.Controllers
         [HttpPost("return")]
         public async Task<IActionResult> ReturnBook([FromBody] BorrowRequest request, CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
+            var userId = _currentUserService.UserId;
+
             var result = await _borrowService.ReturnBookAsync(userId, request, ct);
             return Ok(new { success = result, message = "Book returned successfully." });
         }
@@ -38,7 +42,8 @@ namespace LibraryManagement.Presentation.Controllers
         [HttpPost("renew")]
         public async Task<IActionResult> RenewBorrow([FromBody] BorrowRequest request, CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
+            var userId = _currentUserService.UserId;
+
             var result = await _borrowService.RenewBorrow(request, userId, ct);
             return Ok(result);
         }
@@ -46,7 +51,8 @@ namespace LibraryManagement.Presentation.Controllers
         [HttpGet("my-history")]
         public async Task<IActionResult> GetMyHistory(CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
+            var userId = _currentUserService.UserId;
+
             var history = await _borrowService.GetUserHistoryAsync(userId, ct);
             return Ok(history);
         }
@@ -72,7 +78,9 @@ namespace LibraryManagement.Presentation.Controllers
         public async Task<IActionResult> GetBorrowById(int id, CancellationToken ct)
         {
             var result = await _borrowService.GetBorrowByIdAsync(id, ct);
-            if (result == null) return NotFound("Borrow record not found.");
+
+            if (result == null)
+                return NotFound("Borrow record not found.");
 
             return Ok(result);
         }
@@ -91,12 +99,6 @@ namespace LibraryManagement.Presentation.Controllers
         {
             await _borrowService.ProcessOverdueBorrowsAsync(ct);
             return Ok(new { message = "Overdue borrows processed successfully." });
-        }
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null) throw new UnauthorizedAccessException("User ID is missing form token.");
-            return int.Parse(userIdClaim.Value);
         }
     }
 }

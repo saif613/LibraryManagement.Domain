@@ -8,12 +8,12 @@ namespace LibraryManagement.Application.Interfaces.ServiceInterfaces
 {
     public interface IAuthService
     {
-        Task<AuthModel> RegisterAsync(RegisterDto model);
+        Task<AuthModel> RegisterAsync(RegisterDto model, CancellationToken ct = default);
 
-        Task<AuthModel> LoginAsync(LoginDto model);
+        Task<AuthModel> LoginAsync(LoginDto model, CancellationToken ct = default);
 
         Task<string> LogoutAsync();
 
-        Task<UserResponse> GetUserProfileAsync(int userId);
+        Task<UserResponse> GetUserProfileAsync(int userId, CancellationToken ct = default);
     }
 }

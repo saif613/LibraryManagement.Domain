@@ -1,5 +1,6 @@
 ﻿using LibraryManagement.Application.DTOs.Requests;
 using LibraryManagement.Application.Interfaces.ServiceInterfaces;
+using LibraryManagement.Presentation.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,27 +13,20 @@ namespace LibraryManagement.Presentation.Controllers
     public class ReviewController : ControllerBase
     {
         private readonly IReviewService _reviewService;
+        private readonly ICurrentUserService _currentUserService;
 
-        public ReviewController(IReviewService reviewService)
+        public ReviewController(IReviewService reviewService, ICurrentUserService currentUserService)
         {
             _reviewService = reviewService;
+            _currentUserService = currentUserService;
         }
 
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                throw new UnauthorizedAccessException("Invalid token: User ID not found.");
-            }
-            return int.Parse(userIdClaim.Value);
-        }
 
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> AddReview([FromBody] ReviewRequest request, CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
+            var userId = _currentUserService.UserId;
             await _reviewService.AddReviewAsync(userId, request, ct);
             return Ok(new { message = "Review added successfully." });
         }
@@ -41,7 +35,7 @@ namespace LibraryManagement.Presentation.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateReview(int id, [FromBody] UpdateReviewRequest request, CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
+            var userId = _currentUserService.UserId;
             await _reviewService.UpdateReviewAsync(id, userId, request, ct);
             return Ok(new { message = "Review updated successfully." });
         }
