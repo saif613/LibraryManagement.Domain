@@ -30,6 +30,9 @@ namespace LibraryManagement.Application.Services
             if (await _unitOfWork.Books.ExistsByTitleAsync(request.Title!, ct: ct))
                 throw new ConflictException("Title already exists");
 
+            if (await _unitOfWork.Books.ExistsByUrlAsync(request.Url!, ct: ct))
+                throw new ConflictException("URL already exists");
+
             var category = await _unitOfWork.Categories.GetById(request.CategoryId, ct);
             if (category == null)
                 throw new KeyNotFoundException("The specified Category does not exist.");
@@ -53,11 +56,11 @@ namespace LibraryManagement.Application.Services
 
         public async Task<BookResponse?> GetBookByIdAsync(int id, CancellationToken ct = default)
         {
-            if (id < 0) 
+            if (id < 0)
                 throw new ArgumentException("Invalid book ID.");
 
-            var book = await _unitOfWork.Books.GetBookWithDetailsAsync(id, ct); 
-            
+            var book = await _unitOfWork.Books.GetBookWithDetailsAsync(id, ct);
+
             if (book == null || book.IsDeleted)
                 throw new KeyNotFoundException("Book not found.");
 
@@ -84,10 +87,16 @@ namespace LibraryManagement.Application.Services
                 throw new ConflictException("ISBN already exists");
             }
 
-              if (request.Title != existingBook.Title &&
-                await _unitOfWork.Books.ExistsByTitleAsync(request.Title!, id, ct))
+            if (request.Title != existingBook.Title &&
+              await _unitOfWork.Books.ExistsByTitleAsync(request.Title!, id, ct))
             {
                 throw new ConflictException("Title already exists");
+            }
+
+            if (request.Url != existingBook.URL &&
+             await _unitOfWork.Books.ExistsByUrlAsync(request.Url!, id, ct))
+            {
+                throw new ConflictException("URL already exists");
             }
 
             _mapper.Map(request, existingBook);

@@ -40,8 +40,11 @@ public class BookConfiguration : IEntityTypeConfiguration<Book>
                .IsRequired();
 
         builder.Property(r => r.URL)
-               .IsRequired()           // لازم يكون موجود
+               .IsRequired()           
                .HasMaxLength(500);
+
+        builder.HasIndex(r => r.URL)
+           .IsUnique();
 
         builder.HasMany(b => b.borrows)
                .WithOne(br => br.Book)

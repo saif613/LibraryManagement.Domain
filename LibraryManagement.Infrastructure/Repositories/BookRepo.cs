@@ -61,5 +61,11 @@ namespace LibraryManagement.Infrastructure.Repositories
                 .AnyAsync(b => b.Title == title && (excludeId == null || b.Id != excludeId), ct);
         }
 
+        public async Task<bool> ExistsByUrlAsync(string url, int? excludeId = null, CancellationToken ct = default)
+        {
+            return await _context.Books
+                .AnyAsync(b => b.URL == url && (excludeId == null || b.Id != excludeId), ct);
+        }
+
     }
 }
