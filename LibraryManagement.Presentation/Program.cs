@@ -7,6 +7,7 @@ using LibraryManagement.Application.Services;
 using LibraryManagement.Domain.Entities;
 using LibraryManagement.Infrastructure.Identity;
 using LibraryManagement.Infrastructure.Persistence;
+using LibraryManagement.Infrastructure.Seed.AdminSeed;
 using LibraryManagement.Infrastructure.UnitOfWork;
 using LibraryManagement.Presentation.Middleware;
 using LibraryManagement.Presentation.Service;
@@ -22,13 +23,15 @@ namespace LibraryManagement.Presentation
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+
 
             builder.Services.AddDbContext<LibraryDbContext>(options =>
                 options.UseSqlServer(connectionString));
@@ -174,6 +177,13 @@ namespace LibraryManagement.Presentation
 
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                await DbInitializer.SeedAsync(services);
+            }
+
 
             app.UseMiddleware<RequestLoggingMiddleware>();
             app.UseMiddleware<ExceptionMiddleware>();

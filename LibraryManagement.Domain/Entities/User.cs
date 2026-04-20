@@ -23,7 +23,11 @@ public class User : IdentityUser<int>, IBaseEntity
         UserName = email;
         PasswordHash = passwordHash;
     }
-    private User() { }
+    public User() { }
 
+    public void SetName(string name)
+    {
+        Name = name;
+    }
     public void SetUpdated() => UpdatedAt = DateTime.UtcNow;
 }
