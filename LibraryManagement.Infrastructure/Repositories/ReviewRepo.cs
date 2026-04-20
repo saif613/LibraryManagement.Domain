@@ -23,7 +23,9 @@ namespace LibraryManagement.Infrastructure.Repositories
 
         public async Task<double> GetAverageRatingForBook(int bookId, CancellationToken ct = default)
         {
-            var reviews = _dbSet.Where(r => r.BookId == bookId).AsNoTracking();
+            var reviews = _dbSet
+                .AsNoTracking() 
+                .Where(r => r.BookId == bookId);
 
             if (!await reviews.AnyAsync(ct))
                 return 0;

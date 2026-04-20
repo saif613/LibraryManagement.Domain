@@ -21,6 +21,16 @@ namespace LibraryManagement.Application.Mappings
                     opt => opt.MapFrom(src => src.User != null ? src.User.Name : "Unknown"))
                 .ForMember(dest => dest.Status,
                     opt => opt.MapFrom(src => src.Status.ToString()));
+
+            CreateMap<Borrow, MemberBorrowResponse>()
+     .ForMember(dest => dest.Status,
+         opt => opt.MapFrom(src => src.Status.ToString()));
+
+            CreateMap<Borrow, MemberBorrowHistoryResponse>()
+                .ForMember(dest => dest.BookTitle,
+                    opt => opt.MapFrom(src => src.Book != null ? src.Book.Title : "Unknown"))
+     .ForMember(dest => dest.Status,
+         opt => opt.MapFrom(src => src.Status.ToString()));
         }
     }
 }

@@ -12,6 +12,8 @@ namespace LibraryManagement.Application.Mappings
         public UserProfile()
         {
             CreateMap<User, UserResponse>()
+                .ForMember(dest => dest.FullName,
+        opt => opt.MapFrom(src => src.Name))
     .ForMember(dest => dest.BorrowHistory, opt => opt.MapFrom(src => src.Borrows)) 
     .ForMember(dest => dest.TotalBorrowedBooks, opt => opt.MapFrom(src => src.Borrows.Count))
     .ForMember(dest => dest.CurrentActiveBorrows, opt => opt.MapFrom(src => src.Borrows.Count(b => b.ReturnDate == null)));

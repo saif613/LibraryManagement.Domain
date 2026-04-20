@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LibraryManagement.Application.DTOs.Requests;
 using LibraryManagement.Application.DTOs.Responses;
+using LibraryManagement.Application.Exceptions;
 using LibraryManagement.Application.Interfaces.ServiceInterfaces;
 using LibraryManagement.Application.Interfaces.UnitOfWork;
 using LibraryManagement.Domain.Entities;
@@ -16,16 +17,19 @@ namespace LibraryManagement.Application.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public async Task ProcessOverdueBorrowsAsync(CancellationToken ct)
+        public async Task<int> ProcessOverdueBorrowsAsync(CancellationToken ct)
         {
-            var overdueItems = await _unitOfWork.Borrows.GetOverdueBorrowsAsync(DateTime.UtcNow);
+            var overdueItems = await _unitOfWork.Borrows.GetOverdueBorrowsAsync(DateTime.UtcNow, ct);
 
             foreach (var borrow in overdueItems)
                 borrow.MarkAsOverdue();
 
             await _unitOfWork.SaveChangesAsync(ct);
+
+            return overdueItems.Count();
         }
-        public async Task<BorrowResponse> BorrowBookAsync(BorrowRequest request, int userId, CancellationToken ct = default)
+
+        public async Task<MemberBorrowResponse> BorrowBookAsync(BorrowRequest request, int userId, CancellationToken ct = default)
         {
             var IsThisUserHasBook = await _unitOfWork.Borrows.IsBookAlreadyBorrowedByUser(request.BookId, userId, ct);
 
@@ -53,7 +57,7 @@ namespace LibraryManagement.Application.Services
             await _unitOfWork.SaveChangesAsync(ct);
 
             var result = await _unitOfWork.Borrows.GetBorrowWithDetails(borrowEntity.Id);
-            return _mapper.Map<BorrowResponse>(result);
+            return _mapper.Map<MemberBorrowResponse>(result);
         }
 
         public async Task<IEnumerable<BorrowResponse>> GetActiveBorrowsAsync(CancellationToken ct)
@@ -88,18 +92,18 @@ namespace LibraryManagement.Application.Services
             return _mapper.Map<IEnumerable<BorrowResponse>>(returnedToday);
         }
 
-        public async Task<IEnumerable<BorrowResponse>> GetUserHistoryAsync(int userId, CancellationToken ct)
+        public async Task<IEnumerable<MemberBorrowHistoryResponse>> GetUserHistoryAsync(int userId, CancellationToken ct)
         {
             var userHistory = await _unitOfWork.Borrows.GetUserBorrowHistory(userId, ct);
-            return _mapper.Map<IEnumerable<BorrowResponse>>(userHistory);
+            return _mapper.Map<IEnumerable<MemberBorrowHistoryResponse>>(userHistory);
         }
 
-        public async Task<bool> ReturnBookAsync(int userId, BorrowRequest request, CancellationToken ct)
+        public async Task<bool> ReturnBookAsync(BorrowRequest request, int userId, CancellationToken ct)
         {
-            var activeBorrow = await _unitOfWork.Borrows.GetActiveBorrowByIdAsync(userId, request.BookId);
+            var activeBorrow = await _unitOfWork.Borrows.GetActiveBorrowByIdAsync(request.BookId, userId);
 
             if (activeBorrow == null)
-                throw new ArgumentException("you cannot return this book you have not already loan it");
+                throw new BadRequestException("you cannot return this book you have not already loan it");
 
             activeBorrow.MarkAsReturned();
 
@@ -110,9 +114,9 @@ namespace LibraryManagement.Application.Services
             return true;
         }
 
-        public async Task<BorrowResponse> RenewBorrow(BorrowRequest request, int userId, CancellationToken ct)
+        public async Task<MemberBorrowResponse> RenewBorrow(BorrowRequest request, int userId, CancellationToken ct)
         {
-            var activeBorrow = await _unitOfWork.Borrows.GetActiveBorrowByIdAsync(userId, request.BookId);
+            var activeBorrow = await _unitOfWork.Borrows.GetActiveBorrowByIdAsync(request.BookId, userId);
 
             if (activeBorrow == null)
                 throw new ArgumentException("You cannot renew this book because you do not have an active loan for it.");
@@ -121,7 +125,7 @@ namespace LibraryManagement.Application.Services
 
             await _unitOfWork.SaveChangesAsync(ct);
 
-            return _mapper.Map<BorrowResponse>(activeBorrow);
+            return _mapper.Map<MemberBorrowResponse>(activeBorrow);
         }
     }
 }

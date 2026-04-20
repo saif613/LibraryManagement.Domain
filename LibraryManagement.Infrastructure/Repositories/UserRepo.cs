@@ -14,6 +14,7 @@ namespace LibraryManagement.Infrastructure.Repositories
 
         public async Task<User?> GetUserWithBorrows(int id) =>
                 await _dbSet
+            .AsNoTracking()
                 .Include(u => u.Borrows)
                 .ThenInclude(b => b.Book)
                 .FirstOrDefaultAsync(u => u.Id == id);

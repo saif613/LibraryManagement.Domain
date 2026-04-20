@@ -35,7 +35,7 @@ namespace LibraryManagement.Presentation.Controllers
         {
             var userId = _currentUserService.UserId;
 
-            var result = await _borrowService.ReturnBookAsync(userId, request, ct);
+            var result = await _borrowService.ReturnBookAsync( request, userId, ct);
             return Ok(new { success = result, message = "Book returned successfully." });
         }
 
@@ -93,12 +93,14 @@ namespace LibraryManagement.Presentation.Controllers
             return Ok(result);
         }
 
+
         [HttpPost("process-overdue")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ProcessOverdueBorrows(CancellationToken ct)
+        public async Task<IActionResult> ProcessOverdue(CancellationToken ct)
         {
-            await _borrowService.ProcessOverdueBorrowsAsync(ct);
-            return Ok(new { message = "Overdue borrows processed successfully." });
+            var count = await _borrowService.ProcessOverdueBorrowsAsync(ct);
+
+            return Ok(new { message = $"{count} borrows marked as overdue" });
         }
     }
 }
