@@ -18,5 +18,6 @@ namespace LibraryManagement.Application.Interfaces.Repositories
         Task<bool> HasOverdueBorrowsAsync(int userId, CancellationToken ct = default);
         Task<Borrow?> GetActiveBorrowByIdAsync(int bookId, int userId, CancellationToken ct = default);
         Task<(IEnumerable<Borrow> Data, int TotalCount)> GetPagedBorrowsAsync(int pageNumber, int pageSize, CancellationToken ct);
+        Task<bool> HasUserReturnedBookAsync(int userId, int bookId, CancellationToken ct = default);
     }
 }

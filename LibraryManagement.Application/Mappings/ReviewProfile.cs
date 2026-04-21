@@ -16,6 +16,10 @@ namespace LibraryManagement.Application.Mappings
 
             CreateMap<ReviewRequest, Review>()
                 .ForMember(dest => dest.UserId, opt => opt.Ignore());
+
+           CreateMap<UpdateReviewRequest, Review>()    
+    .ForMember(dest => dest.UserId, opt => opt.Ignore())   
+    .ForMember(dest => dest.BookId, opt => opt.Ignore());   
         }
     }
 }

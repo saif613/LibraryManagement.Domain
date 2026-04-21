@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using LibraryManagement.Application.DTOs.Requests;
 using LibraryManagement.Application.DTOs.Responses;
+using LibraryManagement.Application.Exceptions;
 using LibraryManagement.Application.Interfaces.ServiceInterfaces;
 using LibraryManagement.Application.Interfaces.UnitOfWork;
 using LibraryManagement.Domain.Entities;
@@ -21,6 +22,18 @@ namespace LibraryManagement.Application.Services
         }
         public async Task AddReviewAsync(int userId, ReviewRequest reviewRequest, CancellationToken ct = default)
         {
+            var hasBorrowed = await _unitOfWork.Borrows
+                .IsBookAlreadyBorrowedByUser(userId, reviewRequest.BookId, ct);
+
+            var hasReturned = await _unitOfWork.Borrows
+                .HasUserReturnedBookAsync(userId, reviewRequest.BookId, ct);
+
+            if (!hasBorrowed && !hasReturned)
+                throw new BadRequestException("You must borrow this book before adding a review.");
+
+            if (hasBorrowed && !hasReturned)
+                throw new BadRequestException("You must return the book before adding a review.");
+
             if (reviewRequest == null)
                 throw new ArgumentNullException(nameof(reviewRequest));
 
@@ -102,9 +115,8 @@ namespace LibraryManagement.Application.Services
             if (review.UserId != userId)
                 throw new InvalidOperationException("Access denied. You can only update reviews that you have created.");
 
-            _mapper.Map(request, review);
+             _mapper.Map(request, review);
 
-            _unitOfWork.Reviews.Update(review);
             await _unitOfWork.SaveChangesAsync(ct);
         }
     }

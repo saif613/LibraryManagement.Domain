@@ -97,5 +97,11 @@ namespace LibraryManagement.Infrastructure.Repositories
 
             return (data, totalCount);
         }
+
+        public async Task<bool> HasUserReturnedBookAsync(int userId, int bookId, CancellationToken ct = default) =>
+    await _dbSet.AnyAsync(b =>
+        b.UserId == userId &&
+        b.BookId == bookId &&
+        b.ReturnDate != null, ct);
     }
 }

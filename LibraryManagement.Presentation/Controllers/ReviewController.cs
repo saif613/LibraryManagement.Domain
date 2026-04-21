@@ -74,7 +74,7 @@ namespace LibraryManagement.Presentation.Controllers
         }
 
         [HttpGet("latest")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetLatestReviews([FromQuery] int count = 5, CancellationToken ct = default)
         {
             var reviews = await _reviewService.GetLatestReviewsAsync(count, ct);
@@ -82,11 +82,11 @@ namespace LibraryManagement.Presentation.Controllers
         }
 
         [HttpGet("book/{bookId}/rating")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAverageRating(int bookId, CancellationToken ct)
         {
-            var average = await _reviewService.GetAverageRatingForBookAsync(bookId, ct);
-            return Ok(new { bookId = bookId, averageRating = average });
+            var averageRating = await _reviewService.GetAverageRatingForBookAsync(bookId, ct);
+            return Ok(new { averageRating = averageRating });
         }
     }
 }
