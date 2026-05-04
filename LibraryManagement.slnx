@@ -3,4 +3,5 @@
   <Project Path="LibraryManagement.Domain/LibraryManagement.Domain.csproj" />
   <Project Path="LibraryManagement.Infrastructure/LibraryManagement.Infrastructure.csproj" />
   <Project Path="LibraryManagement.Presentation/LibraryManagement.Presentation.csproj" />
+  <Project Path="LibraryManagement.Tests/LibraryManagement.Tests.csproj" Id="1e759035-4ab9-4811-bdad-d1be36a65290" />
 </Solution>
