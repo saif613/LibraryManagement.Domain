@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LibraryManagement.Application.DTOs.Requests
 {
-    public class RegisterDto
+    public class RegisterRequest
     {
         public string Name { get; set; } = null!;     
         public string Email { get; set; } = null!;     

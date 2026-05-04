@@ -33,7 +33,7 @@ namespace LibraryManagement.Infrastructure.Identity
             _mapper = mapper;
         }
 
-        public async Task<AuthModel> RegisterAsync(RegisterDto model, CancellationToken ct = default)
+        public async Task<AuthModel> RegisterAsync(RegisterRequest model, CancellationToken ct = default)
         {
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
             if (existingUser != null)
@@ -65,7 +65,7 @@ namespace LibraryManagement.Infrastructure.Identity
             };
         }
 
-        public async Task<AuthModel> LoginAsync(LoginDto model, CancellationToken ct = default)
+        public async Task<AuthModel> LoginAsync(LoginRequest model, CancellationToken ct = default)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 

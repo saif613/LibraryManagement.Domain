@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LibraryManagement.Application.Validators
 {
-    public class RegisterDtoValidator: AbstractValidator<RegisterDto>
+    public class RegisterDtoValidator: AbstractValidator<RegisterRequest>
     {
         public RegisterDtoValidator()
         {

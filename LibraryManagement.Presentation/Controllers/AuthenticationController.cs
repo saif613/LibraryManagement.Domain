@@ -21,7 +21,7 @@ namespace LibraryManagement.Presentation.Controllers
         }
 
         [HttpPost("Register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto model)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest model)
         {
             var result = await _authService.RegisterAsync(model);
 
@@ -32,7 +32,7 @@ namespace LibraryManagement.Presentation.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto model)
+        public async Task<IActionResult> Login([FromBody] LoginRequest model)
         {
             var result = await _authService.LoginAsync(model);
 
